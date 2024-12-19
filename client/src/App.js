@@ -5,12 +5,12 @@ import Files from "./pages/Files";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/addFile" element={<AddFile />} />   {/* File upload page */}
-        <Route path="/" element={<Files />} />            {/* List of uploaded files */}
-      </Routes>
-    </BrowserRouter>
+  <BrowserRouter>
+    <Routes>
+    <Route path="/" element={<Files />} />
+    <Route path="/addFile" element={<AddFile />} />
+  </Routes>
+  </BrowserRouter>
   );
 }
 

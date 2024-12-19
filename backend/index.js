@@ -44,8 +44,8 @@ app.get("/files", (req, res) => {
 
 app.post("/files", (req, res) => {
     const q = `
-      INSERT INTO files(fileId, fileName, filePath, fileSize, fileType, parentDirectoryId, createdAt)
-      VALUES (?)`;
+      INSERT INTO files(fileId, fileName, filePath, fileSize, fileType, parentDirectoryId, createdAt, updatedAt)
+      VALUES (?,?,?,?,?,?,?)`;
     const values = [...Object.values(req.body)];
     console.log("Insert values:", values);
     db.query(q, [values], (err, data) => {
@@ -100,6 +100,64 @@ app.delete("/files/:fileId", (req, res) => {
       }
       return res.json({ data });
     });
+});
+
+app.post("/directories/:directoryId", (req, res) => {
+  const { directoryName, parentDirectory } = req.body;
+  const q = `
+    INSERT INTO directories (directoryName, parentDirectory, createdAt, updatedAt)
+    VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `;
+
+  db.query(q, [directoryName, parentDirectory || null], (err, data) => {
+    if (err) return res.json({ error: err.sqlMessage });
+    return res.status(201).json({ data });
+  });
+});
+
+
+app.get("/directories/:directoryId", (req, res) => {
+  const q = "SELECT * FROM directories";
+  db.query(q, (err, data) => {
+    if (err) return res.json({ error: err.sqlMessage });
+    return res.status(200).json({ data });
+  });
+});
+
+
+app.get("/directories/:directoryId", (req, res) => {
+  const directoryId = req.params.directoryId;
+  const q = "SELECT * FROM directories WHERE directoryId = ?";
+  db.query(q, [directoryId], (err, data) => {
+    if (err) return res.json({ error: err.sqlMessage });
+    return res.status(200).json({ data });
+  });
+});
+
+
+app.put("/directories/:directoryId", (req, res) => {
+  const directoryId = req.params.directoryId;
+  const { directoryName, parentDirectory } = req.body;
+  const q = `
+    UPDATE directories 
+    SET directoryName = ?, parentDirectory = ?, updatedAt = CURRENT_TIMESTAMP 
+    WHERE directoryId = ?
+  `;
+
+  db.query(q, [directoryName, parentDirectory || null, directoryId], (err, data) => {
+    if (err) return res.json({ error: err.sqlMessage });
+    return res.status(200).json({ data });
+  });
+});
+
+
+app.delete("/directories/:directoryId", (req, res) => {
+  const directoryId = req.params.directoryId;
+  const q = "DELETE FROM directories WHERE directoryId = ?";
+  db.query(q, [directoryId], (err, data) => {
+    if (err) return res.json({ error: err.sqlMessage });
+    return res.status(200).json({ data });
+  });
 });
 
 app.listen(8081, () => {
