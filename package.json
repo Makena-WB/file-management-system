@@ -1,0 +1,28 @@
+{
+  "name": "file-management-system",
+  "version": "1.0.0",
+  "description": "Interview Coding Challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Makena-WB/file-management-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Makena-WB/file-management-system/issues"
+  },
+  "homepage": "https://github.com/Makena-WB/file-management-system#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {}
+}
