@@ -13,18 +13,34 @@ const db = mysql.createConnection({
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: "file_management",
+  authPlugin: 'mysql_native_password',
 });
 
-appendFile.get("/files", (req, res) => {
-    const q = "SELECT * FROM files";
-    db.query(q, (eer, data) => {
-        if (err) {
-            console.error(err);
-            return res.json({ error: err.sqlMessage });
-        }
-        return res.json({ data });
-    });
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads");
+    },
+    filename: (req, file, cb) => {
+      console.log(req.body, "in");
+      cb(null, `${req.body.productId}${path.extname(file.originalname)}`);
+    },
 });
+  
+const upload = multer({ storage: storage });
+  
+const app = express();
+app.use(cors())
+app.use(express.json())
+app.use('/uploads', express.static(path.join(__dirname ,'uploads')));
+
+app.get("/files", (req, res) => {
+    const q = "SELECT * FROM files";
+    db.query(q, (err, data) => {
+        console.log(err, data);
+        if (err) return res.json({ error: err.sqlMessage });
+        else return res.json({ data });
+      });
+    });
 
 app.post("/files", (req, res) => {
     const q = `
@@ -50,7 +66,7 @@ app.get("/files/:fileId", (req, res) => {
         console.error(err);
         return res.json({ error: err.sqlMessage });
       }
-      return res.json({ data });
+      return res.status(200).json({ data });
     });
 });
   
