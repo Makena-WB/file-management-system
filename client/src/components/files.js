@@ -8,8 +8,8 @@ const File = ({
   fileId,
   fileName,
   filePath,
-  fileDescription, // Optional description if needed
-  fileSize, // Optional file size or other properties
+  fileDescription, 
+  fileSize, 
 }) => {
   return (
     <>
@@ -34,7 +34,7 @@ const File = ({
               </Link>
               <button
                 onClick={async () => {
-                  await deleteFile(fileId, filePath); // Correct function call
+                  await deleteFile(fileId, filePath); 
                   console.log("Deleted");
                 }}
                 className="uppercase border-gray-500 text-gray-500 w-full font-medium"

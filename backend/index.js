@@ -16,6 +16,46 @@ const db = mysql.createConnection({
   authPlugin: 'mysql_native_password',
 });
 
+const ensurePredefinedDirectories = async () => {
+  const predefinedDirs = [
+    { directoryId: "root", directoryName: "Root", parentDirectoryId: null },
+    { directoryId: "uploads", directoryName: "Uploads", parentDirectoryId: null },
+  ];
+
+  for (const dir of predefinedDirs) {
+    const checkQuery = "SELECT * FROM directories WHERE directoryId = ?";
+    const insertQuery = `
+      INSERT INTO directories (directoryId, directoryName, parentDirectoryId, createdAt)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+    `;
+
+    db.query(checkQuery, [dir.directoryId], (err, result) => {
+      if (err) {
+        console.error("Error checking predefined directories:", err);
+        return;
+      }
+
+      if (result.length === 0) {
+        // Insert predefined directory if it doesn't exist
+        db.query(insertQuery, [dir.directoryId, dir.directoryName, dir.parentDirectoryId], (insertErr) => {
+          if (insertErr) console.error("Error inserting predefined directory:", insertErr);
+        });
+      }
+    });
+  }
+};
+
+db.connect((err) => {
+  if (err) {
+    console.error("Error connecting to the database:", err);
+    return;
+  }
+  console.log("Connected to the database");
+
+  // Ensure predefined directories exist after the DB connection is established
+  ensurePredefinedDirectories();
+});
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, "uploads");
@@ -42,11 +82,15 @@ app.get("/files", (req, res) => {
       });
     });
 
-app.post("/files", (req, res) => {
-  const q = `
-    INSERT INTO files (fileName, filePath, fileSize, fileType, parentDirectoryId, createdAt, updatedAt) 
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `;
+app.post("/upload", upload.single("file"), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    
+    const q = `
+      INSERT INTO files (fileName, filePath, fileSize, fileType, parentDirectoryId, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
 
   const values = [
     req.body.fileName,
@@ -54,12 +98,12 @@ app.post("/files", (req, res) => {
     req.body.fileSize,
     req.body.fileType,
     req.body.parentDirectoryId,
-    createdAt(),  // Current date and time for createdAt
-    updatedAt(),  // Current date and time for updatedAt
+    new Date(),
+    new Date(),
   ];
 
   db.query(q, values, (err, data) => {
-    if (err) return res.status(500).send(err);  // Return server error if any
+    if (err) return res.status(500).send(err);  
     return res.json(data);
   });
 });
@@ -112,8 +156,8 @@ app.delete("/files/:fileId", (req, res) => {
 app.post("/directories/:directoryId", (req, res) => {
   const { directoryName, parentDirectory } = req.body;
   const q = `
-    INSERT INTO directories (directoryName, parentDirectory, createdAt, updatedAt)
-    VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO directories (directoryName, parentDirectoryId, createdAt)
+    VALUES (?, ?, CURRENT_TIMESTAMP)
   `;
 
   db.query(q, [directoryName, parentDirectory || null], (err, data) => {
@@ -124,22 +168,53 @@ app.post("/directories/:directoryId", (req, res) => {
 
 
 app.get("/directories/:directoryId", (req, res) => {
-  const q = "SELECT * FROM directories";
-  db.query(q, (err, data) => {
-    if (err) return res.json({ error: err.sqlMessage });
-    return res.status(200).json({ data });
-  });
-});
-
-
-app.get("/directories/:directoryId", (req, res) => {
   const directoryId = req.params.directoryId;
+
+  // Query to get directories from the database
   const q = "SELECT * FROM directories WHERE directoryId = ?";
   db.query(q, [directoryId], (err, data) => {
-    if (err) return res.json({ error: err.sqlMessage });
-    return res.status(200).json({ data });
+    if (err) {
+      console.error(err);
+      return res.json({ error: err.sqlMessage });
+    }
+
+    // Add predefined directories
+    const predefinedDirs = [
+      { directoryId: "root", directoryName: "Root", parentDirectoryId: null },
+      { directoryId: "uploads", directoryName: "Uploads", parentDirectoryId: "root" }
+    ];
+
+    // Combine predefined directories with database result
+    const allDirectories = [...predefinedDirs, ...data];
+
+    return res.status(200).json({ data: allDirectories });
   });
 });
+
+
+
+app.get("/directories", (req, res) => {
+  // Query to get all directories from the database
+  const q = "SELECT * FROM directories";
+  db.query(q, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.json({ error: err.sqlMessage });
+    }
+
+    // Add predefined directories
+    const predefinedDirs = [
+      { directoryId: "root", directoryName: "Root", parentDirectoryId: null },
+      { directoryId: "uploads", directoryName: "Uploads", parentDirectoryId: "root" }
+    ];
+
+    // Combine predefined directories with database result
+    const allDirectories = [...predefinedDirs, ...data];
+
+    return res.status(200).json({ data: allDirectories });
+  });
+});
+
 
 
 app.put("/directories/:directoryId", (req, res) => {

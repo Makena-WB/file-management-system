@@ -9,6 +9,7 @@ const AddFile = () => {
     size: "",
     type: "",
   });
+
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [error, setError] = useState(false);
@@ -28,24 +29,25 @@ const AddFile = () => {
   
     const formData = new FormData();
   
-    // Append file data details
-    formData.append("fileName", fileData.title);      // Use title for fileName
-    formData.append("filePath", selectedFile.path);   // Use selectedFile.path for filePath
-    formData.append("fileSize", selectedFile.size);   // File size from selected file
-    formData.append("fileType", selectedFile.type);   // File type from selected file
-    formData.append("parentDirectoryId", selectedId); // Assume selectedDirId is provided
-    formData.append("file", selectedFile);  // Append the selected file
+    formData.append("fileName", fileData.title);      
+    formData.append("filePath", selectedFile.path);   
+    formData.append("fileSize", selectedFile.size);   
+    formData.append("fileType", selectedFile.type);   
+    formData.append("parentDirectoryId", selectedId); 
+    formData.append("file", selectedFile);  
   
     try {
       await axios.post("http://localhost:8081/files", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      navigate("/");  // Redirect to the home page after successful upload
+      navigate("/");  
     } catch (err) {
       console.error(err);
-      setError(true);  // Show error message
+      setError(true);  
     }
   };
+
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -120,12 +122,20 @@ const AddFile = () => {
             Something went wrong. Please try again.
           </p>
         )}
-        <Link
-          to="/"
-          className="mt-6 inline-block text-blue-500 hover:underline text-sm"
-        >
-          View All Files
-        </Link>
+        <div className="mt-6 flex space-x-4">
+          <Link
+            to="/"
+            className="inline-block text-blue-500 hover:underline text-sm"
+          >
+            View All Files
+          </Link>
+          <Link
+            to="/uploads"
+            className="inline-block text-blue-500 hover:underline text-sm"
+          >
+            View Uploads
+          </Link>
+        </div>
       </div>
     </div>
   );

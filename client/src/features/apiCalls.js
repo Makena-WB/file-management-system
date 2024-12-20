@@ -92,14 +92,15 @@ export const addDirectory = async (directory) => {
   }
 };
 
-export const updateDirectory = async (directory, directoryId) => {
+export const updateDirectory = async (directoryId, updatedData) => {
   try {
-    const res = await axios.put("http://localhost:8081/directories/123" + directoryId, directory);
-    return res.data;
-  } catch (err) {
-    return { error: err };
+    const response = await axios.put(`http://localhost:8081/directories/${directoryId}`, updatedData);
+    return { data: response.data, error: null };
+  } catch (error) {
+    return { data: null, error };
   }
 };
+
 
 export const deleteDirectory = async (directoryId) => {
   try {
