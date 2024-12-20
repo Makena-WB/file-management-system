@@ -3,6 +3,7 @@ import axios from "axios";
 export const getFiles = async () => {
   try {
     const res = await axios.get("http://localhost:8081/files/");
+    console.log("Files:", res.data);
     return res.data;
   } catch (err) {
     console.log(err);
@@ -55,6 +56,54 @@ export const updateFile = async (file, fileId) => {
 export const deleteFile = async (fileId) => {
   try {
     const res = await axios.delete("http://localhost:8081/files/" + fileId);
+    return res.data;
+  } catch (err) {
+    return { error: err };
+  }
+};
+
+export const getDirectories = async () => {
+  try {
+    const res = await axios.get("http://localhost:8081/directories/123");
+    console.log("Directories:", res.data);
+    return res.data;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
+export const getDirectoryById = async (id) => {
+  try {
+    const res = await axios.get("http://localhost:8081/directories/123" + id);
+    return res.data;
+  } catch (err) {
+    return { error: err.message };
+  }
+};
+
+export const addDirectory = async (directory) => {
+  try {
+    const res = await axios.post("http://localhost:8081/directories/123", directory);
+    return res.data;
+  } catch (err) {
+    console.log(err);
+    return { error: err };
+  }
+};
+
+export const updateDirectory = async (directory, directoryId) => {
+  try {
+    const res = await axios.put("http://localhost:8081/directories/123" + directoryId, directory);
+    return res.data;
+  } catch (err) {
+    return { error: err };
+  }
+};
+
+export const deleteDirectory = async (directoryId) => {
+  try {
+    const res = await axios.delete("http://localhost:8081/directories/123" + directoryId);
     return res.data;
   } catch (err) {
     return { error: err };

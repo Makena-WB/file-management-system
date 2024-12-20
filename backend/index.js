@@ -43,18 +43,25 @@ app.get("/files", (req, res) => {
     });
 
 app.post("/files", (req, res) => {
-    const q = `
-      INSERT INTO files(fileId, fileName, filePath, fileSize, fileType, parentDirectoryId, createdAt, updatedAt)
-      VALUES (?,?,?,?,?,?,?)`;
-    const values = [...Object.values(req.body)];
-    console.log("Insert values:", values);
-    db.query(q, [values], (err, data) => {
-      if (err) {
-        console.error(err);
-        return res.json({ error: err.sqlMessage });
-      }
-      return res.json({ data });
-    });
+  const q = `
+    INSERT INTO files (fileName, filePath, fileSize, fileType, parentDirectoryId, createdAt, updatedAt) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    req.body.fileName,
+    req.body.filePath,
+    req.body.fileSize,
+    req.body.fileType,
+    req.body.parentDirectoryId,
+    createdAt(),  // Current date and time for createdAt
+    updatedAt(),  // Current date and time for updatedAt
+  ];
+
+  db.query(q, values, (err, data) => {
+    if (err) return res.status(500).send(err);  // Return server error if any
+    return res.json(data);
+  });
 });
   
 
