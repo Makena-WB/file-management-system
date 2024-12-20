@@ -21,7 +21,7 @@ In the project directory, you can run:
 
 2. Navigate to the `client` directory:
    ```bash
-   cd backend
+   cd client
 In the project directory, you can run:
 
 ### `npm start`
